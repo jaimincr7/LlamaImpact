@@ -1,21 +1,27 @@
 from pinecone.grpc import PineconeGRPC as Pinecone
-from pinecone import ServerlessSpec
+from dotenv import load_dotenv
+import os
+import json
 
-pc = Pinecone(api_key="YOUR_API_KEY")
+def getData():
+    file_path = os.path.join(os.path.dirname(__file__), '../data/tax_filing_faq.json')
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+    return data
 
-pc.create_index(
-  name="example-index",
-  dimension=1536,
-  metric="cosine",
-  spec=ServerlessSpec(
-    cloud="aws",
-    region="us-east-1"
-  )
+load_dotenv()
+
+pinecone_api_key = os.getenv("PINECONE_API_KEY")
+
+# Initialize Pinecone with your API key
+pc = Pinecone(api_key=pinecone_api_key)
+
+data = getData()
+
+embeddings = pc.inference.embed(
+    model="multilingual-e5-large",
+    inputs=[d['question'] for d in data],
+    parameters={"input_type": "passage", "truncate": "END"}
 )
 
-pc = Pinecone(
-    api_key="YOUR_API_KEY",
-    proxy_url='https://your-proxy.com',
-    proxy_headers=make_headers(proxy_basic_auth='username:password'),
-    ssl_ca_certs='path/to/cert-bundle.pem'
-)
+print(embeddings)

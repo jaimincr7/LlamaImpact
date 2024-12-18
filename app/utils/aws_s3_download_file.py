@@ -2,7 +2,6 @@ import boto3
 import os
 
 S3_BUCKET = os.getenv('S3_BUCKET')
-S3_PREFIX = os.getenv('S3_PREFIX')
 S3_CLIENT = boto3.client('s3')
 
 def download_files_from_s3(local_dir):
